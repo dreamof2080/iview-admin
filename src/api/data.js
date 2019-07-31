@@ -1,5 +1,53 @@
 import axios from '@/libs/api.request'
 
+// 获取服务器列表信息
+export const getServerList = () => {
+  return axios.request({
+    url: '/linux/group',
+    method: 'get'
+  })
+}
+
+// 获取服务器的docker信息
+export const getDockerInfo = (ip) => {
+  return axios.request({
+    url: '/docker/container/list/' + ip,
+    method: 'get'
+  })
+}
+
+// 启动某个容器
+export const startContainer = (ip, id) => {
+  return axios.request({
+    url: '/docker/container/start/' + ip + '/' + id,
+    method: 'post'
+  })
+}
+
+// 停止某个容器
+export const stopContainer = (ip, id) => {
+  return axios.request({
+    url: '/docker/container/stop/' + ip + '/' + id,
+    method: 'post'
+  })
+}
+
+// 重启某个容器
+export const restartContainer = (ip, id) => {
+  return axios.request({
+    url: '/docker/container/restart/' + ip + '/' + id,
+    method: 'post'
+  })
+}
+
+// 删除某个容器
+export const removeContainer = (ip, id) => {
+  return axios.request({
+    url: '/docker/container/remove/' + ip + '/' + id,
+    method: 'delete'
+  })
+}
+
 export const getTableData = () => {
   return axios.request({
     url: 'get_table_data',
