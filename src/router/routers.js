@@ -51,6 +51,25 @@ export default [
     ]
   },
   {
+    path: '/server_list',
+    name: 'server_list',
+    meta: {
+      hideInBread: true
+    },
+    component: Main,
+    children: [
+      {
+        path: 'server_list_page',
+        name: 'server_list_page',
+        meta: {
+          icon: 'ios-navigate',
+          title: '服务器列表'
+        },
+        component: () => import('@/view/server-list/server-list.vue')
+      }
+    ]
+  },
+  {
     path: '',
     name: 'doc',
     meta: {
