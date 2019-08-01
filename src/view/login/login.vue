@@ -33,6 +33,8 @@ export default {
             name: this.$config.homeName
           })
         })
+      }).catch(err => {
+        this.$Message.error(err)
       })
     }
   }
