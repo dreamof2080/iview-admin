@@ -1,9 +1,13 @@
 import axios from '@/libs/api.request'
+import store from '@/store'
 
 // 获取服务器列表信息
 export const getServerList = () => {
   return axios.request({
     url: '/linux/group',
+    params: {
+      token: store.state.user.token
+    },
     method: 'get'
   })
 }
@@ -12,6 +16,9 @@ export const getServerList = () => {
 export const getDockerInfo = (ip) => {
   return axios.request({
     url: '/docker/container/list/' + ip,
+    params: {
+      token: store.state.user.token
+    },
     method: 'get'
   })
 }
@@ -20,6 +27,9 @@ export const getDockerInfo = (ip) => {
 export const startContainer = (ip, id) => {
   return axios.request({
     url: '/docker/container/start/' + ip + '/' + id,
+    params: {
+      token: store.state.user.token
+    },
     method: 'post'
   })
 }
@@ -28,6 +38,9 @@ export const startContainer = (ip, id) => {
 export const stopContainer = (ip, id) => {
   return axios.request({
     url: '/docker/container/stop/' + ip + '/' + id,
+    params: {
+      token: store.state.user.token
+    },
     method: 'post'
   })
 }
@@ -36,6 +49,9 @@ export const stopContainer = (ip, id) => {
 export const restartContainer = (ip, id) => {
   return axios.request({
     url: '/docker/container/restart/' + ip + '/' + id,
+    params: {
+      token: store.state.user.token
+    },
     method: 'post'
   })
 }
@@ -44,7 +60,32 @@ export const restartContainer = (ip, id) => {
 export const removeContainer = (ip, id) => {
   return axios.request({
     url: '/docker/container/remove/' + ip + '/' + id,
+    params: {
+      token: store.state.user.token
+    },
     method: 'delete'
+  })
+}
+
+// 获取镜像列表
+export const getImageList = (ip) => {
+  return axios.request({
+    url: '/docker/image/list/' + ip,
+    params: {
+      token: store.state.user.token
+    },
+    method: 'get'
+  })
+}
+
+// 获取容器日志数据
+export const getContainerLog = (ip, id, startDateTime, tail) => {
+  return axios.request({
+    url: '/docker/container/log/' + ip + '/' + id + '/' + startDateTime + '/' + tail,
+    params: {
+      token: store.state.user.token
+    },
+    method: 'get'
   })
 }
 
