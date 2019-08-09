@@ -32,28 +32,68 @@
         </Row>
       </Card>
     </div>
-<!--    抽屉显示容器信息-->
-    <Drawer :title="drawer.title" width="640" :draggable="true"  v-model="drawer.flag" class="drawer">
+<!--    抽屉显示容器信息或镜像信息-->
+    <Drawer :title="drawer.title" width="840" :draggable="true"  v-model="drawer.flag" class="drawer">
       <div class="drawer-header">
         <Row class="drawer-header-row">
           <i-Col span="6" class="drawer-header-row-name">Total</i-Col>
-          <i-Col span="18">{{dockerInfo.containers}}</i-Col>
+          <i-Col span="18">{{drawer.type==='container'?containers.total:images.total}}</i-Col>
         </Row>
-        <Row class="drawer-header-row">
+        <Row v-if="drawer.type==='container'" class="drawer-header-row">
           <i-Col span="8" class="drawer-header-row-name">Running</i-Col>
           <i-Col span="8" class="drawer-header-row-name">Exited</i-Col>
           <i-Col span="8" class="drawer-header-row-name">Paused</i-Col>
         </Row>
-        <Row class="drawer-header-row">
-          <i-Col span="8">{{dockerInfo.containersRunning}}</i-Col>
-          <i-Col span="8">{{dockerInfo.containersStopped}}</i-Col>
-          <i-Col span="8">{{dockerInfo.containersPaused}}</i-Col>
+        <Row v-if="drawer.type==='container'" class="drawer-header-row">
+          <i-Col span="8">{{containers.running}}</i-Col>
+          <i-Col span="8">{{containers.exited}}</i-Col>
+          <i-Col span="8">{{containers.paused}}</i-Col>
         </Row>
       </div>
 
       <div class="drawer-details">
-        <Collapse accordion>
-          <Panel v-for="(item,k) in dockerInfo.containerList" :key="k" :name="item.id">
+        <!--          镜像信息-->
+        <Card v-if="drawer.type==='image'" class="drawer-details-card" v-for="(item,k) in images.list" :key="k" :name="item.id">
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">id</i-Col>
+            <i-Col span="18">{{item.id}}</i-Col>
+          </Row>
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">parentId</i-Col>
+            <i-Col span="18">{{item.parentId}}</i-Col>
+          </Row>
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">created</i-Col>
+            <i-Col span="18">{{item.created}}</i-Col>
+          </Row>
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">repoTags</i-Col>
+            <i-Col span="18">
+              <div v-for="(repo, index) in item.repoTags" :key="index" class="drawer-details-card-row-repo">
+                {{repo}}
+                <ButtonGroup>
+                  <Button size="small" type="warning" ghost @click="handleImageRemove(repo)">remove</Button>
+                  <Button size="small" type="success" ghost>tag</Button>
+                </ButtonGroup>
+              </div>
+            </i-Col>
+          </Row>
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">size</i-Col>
+            <i-Col span="18">{{(item.size/1024/1024).toFixed(2)}}MB</i-Col>
+          </Row>
+          <Row class="drawer-details-card-row">
+            <i-Col span="4">action</i-Col>
+            <i-Col span="18">
+              <ButtonGroup>
+                <Button size="small" type="error" @click="handleImageRemove(item.id)">remove</Button>
+              </ButtonGroup>
+            </i-Col>
+          </Row>
+        </Card>
+        <!--          容器信息-->
+        <Collapse v-if="drawer.type==='container'" accordion>
+          <Panel v-for="(item,k) in containers.list" :key="k" :name="item.id">
             {{item.names[0].substring(1)}}
             <Tag v-if="item.state==='running'" color="blue">Running</Tag>
             <Tag v-if="item.state==='exited'" color="red">Exited</Tag>
@@ -104,13 +144,7 @@
         </Collapse>
       </div>
     </Drawer>
-<!--    删除容器提示框-->
-    <Modal
-      v-model="removeModel.flag"
-      title="please confirm"
-      @on-ok="removeContainerOK(removeModel.containerId)">
-      <p>Are you sure doing this？this cannot redo！</p>
-    </Modal>
+
 <!--    显示日志对话框-->
     <Modal
       v-model="logModel.flag"
@@ -148,13 +182,14 @@
 <script>
 import {
   getServerList,
-  getDockerInfo,
+  getContainerList,
   startContainer,
   stopContainer,
   restartContainer,
   removeContainer,
   getContainerLog,
-  getImageList } from '@/api/data'
+  getImageList,
+  removeImage } from '@/api/data'
 export default {
   name: 'server_list_page',
   data () {
@@ -164,15 +199,14 @@ export default {
       drawer: {
         ip: '',
         title: '',
-        flag: false
-      },
-      // 某个服务器对应的docker信息
-      dockerInfo: {},
-      // 删除容器模态提示框
-      removeModel: {
         flag: false,
-        containerId: ''
+        // container|image
+        type: ''
       },
+      // 某个服务器对应的镜像信息
+      images: {},
+      // 某个服务器对应的容器信息
+      containers: {},
       // 显示日志对话模态框
       logModel: {
         flag: false,
@@ -206,7 +240,12 @@ export default {
     // 显示服务器的docker的镜像信息
     handleDockerImageClick (ip) {
       getImageList(ip).then(res => {
-        console.log(res.data.data)
+        const { data } = res.data
+        this.images = data
+        this.drawer.ip = ip
+        this.drawer.title = 'Images: ' + ip
+        this.drawer.flag = true
+        this.drawer.type = 'image'
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
@@ -216,12 +255,13 @@ export default {
     },
     // 显示服务器的docker的容器信息
     handleDockerContainerClick (ip) {
-      getDockerInfo(ip).then(res => {
+      getContainerList(ip).then(res => {
         const { data } = res.data
-        this.dockerInfo = data
+        this.containers = data
         this.drawer.ip = ip
         this.drawer.title = 'Containers: ' + ip
         this.drawer.flag = true
+        this.drawer.type = 'container'
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
@@ -314,30 +354,60 @@ export default {
     },
     // 删除某个容器
     handleContainerRemove (id) {
-      this.removeModel.flag = true
-      this.removeModel.containerId = id
-    },
-    // 删除某个容器模态框点击确定
-    removeContainerOK (id) {
-      removeContainer(this.drawer.ip, id).then(res => {
-        if (res.data.ok) {
-          this.$Notice.success({
-            title: 'success',
-            desc: 'container restart success！'
-          })
-          // 刷新drawer
-          this.handleDockerContainerClick(this.drawer.ip)
-        } else {
-          this.$Notice.error({
-            title: 'error',
-            desc: res.data.msg
+      this.$Modal.confirm({
+        title: 'warning',
+        content: '<p>Are you sure doing this？</p><p>this cannot redo！</p>',
+        onOk: () => {
+          removeContainer(this.drawer.ip, id).then(res => {
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: 'success',
+                desc: 'container remove success！'
+              })
+              // 刷新drawer
+              this.handleDockerContainerClick(this.drawer.ip)
+            } else {
+              this.$Notice.error({
+                title: 'error',
+                desc: res.data.msg
+              })
+            }
+          }).catch(data => {
+            this.$Notice.error({
+              title: 'error',
+              desc: data
+            })
           })
         }
-      }).catch(data => {
-        this.$Notice.error({
-          title: 'error',
-          desc: data
-        })
+      })
+    },
+    // 删除某个镜像
+    handleImageRemove (id) {
+      this.$Modal.confirm({
+        title: 'warning',
+        content: '<p>Are you sure doing this？</p><p>this cannot redo！</p>',
+        onOk: () => {
+          removeImage(this.drawer.ip, id).then(res => {
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: 'success',
+                desc: 'image remove success！'
+              })
+              // 刷新drawer
+              this.handleDockerImageClick(this.drawer.ip)
+            } else {
+              this.$Notice.error({
+                title: 'error',
+                desc: res.data.msg
+              })
+            }
+          }).catch(data => {
+            this.$Notice.error({
+              title: 'error',
+              desc: data
+            })
+          })
+        }
       })
     },
     // 显示日志
@@ -421,9 +491,13 @@ export default {
     font-size: 13px;
     &-card {
       font-size: 13px;
+      margin-bottom: 5px;
       &-row{
         margin-bottom: 5px;
         color: #6c6d8e;
+        &-repo {
+          margin-bottom: 3px;
+        }
       }
     }
   }
