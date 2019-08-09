@@ -13,7 +13,7 @@ export const getServerList = () => {
 }
 
 // 获取服务器的docker信息
-export const getDockerInfo = (ip) => {
+export const getContainerList = (ip) => {
   return axios.request({
     url: '/docker/container/list/' + ip,
     params: {
@@ -75,6 +75,18 @@ export const getImageList = (ip) => {
       token: store.state.user.token
     },
     method: 'get'
+  })
+}
+
+// 删除某个镜像
+export const removeImage = (ip, id) => {
+  return axios.request({
+    url: '/docker/image/remove/' + ip,
+    params: {
+      token: store.state.user.token,
+      id: id
+    },
+    method: 'delete'
   })
 }
 
