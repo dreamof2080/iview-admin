@@ -73,7 +73,8 @@
                 {{repo}}
                 <ButtonGroup>
                   <Button size="small" type="warning" ghost @click="handleImageRemove(repo)">remove</Button>
-                  <Button size="small" type="success" ghost>tag</Button>
+                  <Button size="small" type="success" ghost @click="handleImageTag(item.id, repo)">tag</Button>
+                  <Button size="small" type="primary" ghost @click="handleImagePush(repo)">push</Button>
                 </ButtonGroup>
               </div>
             </i-Col>
@@ -189,7 +190,9 @@ import {
   removeContainer,
   getContainerLog,
   getImageList,
-  removeImage } from '@/api/data'
+  removeImage,
+  tagImage,
+  pushImage } from '@/api/data'
 export default {
   name: 'server_list_page',
   data () {
@@ -218,7 +221,9 @@ export default {
       logDetail: {
         flag: false,
         log: ''
-      }
+      },
+      // 临时信息记录
+      tempValue: ''
     }
   },
   computed: {
@@ -269,7 +274,7 @@ export default {
         })
       })
     },
-    // 启动某个容器
+    // 启动容器
     handleContainerStart (id, state) {
       if (state === 'running') {
         this.$Notice.warning({
@@ -299,7 +304,7 @@ export default {
         })
       }
     },
-    // 停止某个容器
+    // 停止容器
     handleContainerStop (id, state) {
       if (state === 'exited') {
         this.$Notice.warning({
@@ -329,7 +334,7 @@ export default {
         })
       }
     },
-    // 重启某个容器
+    // 重启容器
     handleContainerRestart (id) {
       restartContainer(this.drawer.ip, id).then(res => {
         if (res.data.ok) {
@@ -352,7 +357,7 @@ export default {
         })
       })
     },
-    // 删除某个容器
+    // 删除容器
     handleContainerRemove (id) {
       this.$Modal.confirm({
         title: 'warning',
@@ -381,7 +386,7 @@ export default {
         }
       })
     },
-    // 删除某个镜像
+    // 删除镜像
     handleImageRemove (id) {
       this.$Modal.confirm({
         title: 'warning',
@@ -395,6 +400,77 @@ export default {
               })
               // 刷新drawer
               this.handleDockerImageClick(this.drawer.ip)
+            } else {
+              this.$Notice.error({
+                title: 'error',
+                desc: res.data.msg
+              })
+            }
+          }).catch(data => {
+            this.$Notice.error({
+              title: 'error',
+              desc: data
+            })
+          })
+        }
+      })
+    },
+    // 创建镜像的tag
+    handleImageTag (id, repository) {
+      this.tempValue = ''
+      this.$Modal.confirm({
+        title: 'Please enter your tag',
+        onOk: () => {
+          this.tempValue = this.tempValue ? this.tempValue : 'latest'
+          tagImage(this.drawer.ip, id, repository, this.tempValue).then(res => {
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: 'success',
+                desc: 'create tag success！'
+              })
+              // 刷新drawer
+              this.handleDockerImageClick(this.drawer.ip)
+            } else {
+              this.$Notice.error({
+                title: 'error',
+                desc: res.data.msg
+              })
+            }
+          }).catch(data => {
+            this.$Notice.error({
+              title: 'error',
+              desc: data
+            })
+          })
+        },
+        render: (h) => {
+          return h('Input', {
+            props: {
+              value: this.tempValue,
+              autofocus: true,
+              placeholder: 'if tag is null, then default value is latest'
+            },
+            on: {
+              input: (val) => {
+                this.tempValue = val
+              }
+            }
+          })
+        }
+      })
+    },
+    // push镜像
+    handleImagePush (id) {
+      this.$Modal.confirm({
+        title: 'warning',
+        content: '<p>Are you sure doing this？</p>',
+        onOk: () => {
+          pushImage(this.drawer.ip, id).then(res => {
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: 'success',
+                desc: 'push image success！'
+              })
             } else {
               this.$Notice.error({
                 title: 'error',
