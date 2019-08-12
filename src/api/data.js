@@ -90,6 +90,32 @@ export const removeImage = (ip, id) => {
   })
 }
 
+// 创建镜像的tag
+export const tagImage = (ip, id, repository, tag) => {
+  return axios.request({
+    url: '/docker/image/tag/' + ip,
+    params: {
+      token: store.state.user.token,
+      id: id,
+      repository: repository,
+      tag: tag
+    },
+    method: 'put'
+  })
+}
+
+// push image
+export const pushImage = (ip, repository) => {
+  return axios.request({
+    url: '/docker/image/push/' + ip,
+    params: {
+      token: store.state.user.token,
+      repository: repository
+    },
+    method: 'post'
+  })
+}
+
 // 获取容器日志数据
 export const getContainerLog = (ip, id, startDateTime, tail) => {
   return axios.request({
