@@ -116,6 +116,34 @@ export const pushImage = (ip, repository) => {
   })
 }
 
+// pull image
+export const pullImage = (ip, imageName, isLocal) => {
+  return axios.request({
+    url: '/docker/image/pull/' + ip,
+    params: {
+      token: store.state.user.token,
+      name: imageName,
+      isLocal: isLocal
+    },
+    method: 'post'
+  })
+}
+
+// 创建容器
+export const createContainer = (ip, id, containerName, ports, volumes) => {
+  return axios.request({
+    url: '/docker/image/createContainer/' + ip,
+    params: {
+      token: store.state.user.token,
+      id: id,
+      name: containerName,
+      ports: ports,
+      volumes: volumes
+    },
+    method: 'put'
+  })
+}
+
 // 获取容器日志数据
 export const getContainerLog = (ip, id, startDateTime, tail) => {
   return axios.request({
