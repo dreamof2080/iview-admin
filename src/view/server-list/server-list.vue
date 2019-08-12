@@ -34,6 +34,10 @@
     </div>
 <!--    抽屉显示容器信息或镜像信息-->
     <Drawer :title="drawer.title" width="840" :draggable="true"  v-model="drawer.flag" class="drawer">
+      <Spin fix v-if="drawer.spinShow">
+        <Icon type="ios-loading" size=18 class="spin-icon-load"></Icon>
+        <div>Loading</div>
+      </Spin>
       <div class="drawer-header">
         <Row class="drawer-header-row">
           <i-Col span="6" class="drawer-header-row-name">Total</i-Col>
@@ -264,6 +268,7 @@ export default {
       server_list: [],
       drawer: {
         ip: '',
+        spinShow: false,
         title: '',
         flag: false,
         // container|image
@@ -325,6 +330,7 @@ export default {
     },
     // 显示服务器的docker的镜像信息
     handleDockerImageClick (ip) {
+      this.drawer.spinShow = true
       getImageList(ip).then(res => {
         const { data } = res.data
         this.images = data
@@ -332,15 +338,18 @@ export default {
         this.drawer.title = 'Images: ' + ip
         this.drawer.flag = true
         this.drawer.type = 'image'
+        this.drawer.spinShow = false
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
           desc: data
         })
+        this.drawer.spinShow = false
       })
     },
     // 显示服务器的docker的容器信息
     handleDockerContainerClick (ip) {
+      this.drawer.spinShow = true
       getContainerList(ip).then(res => {
         const { data } = res.data
         this.containers = data
@@ -348,11 +357,13 @@ export default {
         this.drawer.title = 'Containers: ' + ip
         this.drawer.flag = true
         this.drawer.type = 'container'
+        this.drawer.spinShow = false
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
           desc: data
         })
+        this.drawer.spinShow = false
       })
     },
     // 启动容器
@@ -363,6 +374,7 @@ export default {
           desc: 'container is running！'
         })
       } else {
+        this.drawer.spinShow = true
         startContainer(this.drawer.ip, id).then(res => {
           if (res.data.ok) {
             this.$Notice.success({
@@ -376,12 +388,14 @@ export default {
               title: 'error',
               desc: res.data.msg
             })
+            this.drawer.spinShow = false
           }
         }).catch(data => {
           this.$Notice.error({
             title: 'error',
             desc: data
           })
+          this.drawer.spinShow = false
         })
       }
     },
@@ -393,6 +407,7 @@ export default {
           desc: 'container had exited！'
         })
       } else {
+        this.drawer.spinShow = true
         stopContainer(this.drawer.ip, id).then(res => {
           if (res.data.ok) {
             this.$Notice.success({
@@ -406,17 +421,20 @@ export default {
               title: 'error',
               desc: res.data.msg
             })
+            this.drawer.spinShow = false
           }
         }).catch(data => {
           this.$Notice.error({
             title: 'error',
             desc: data
           })
+          this.drawer.spinShow = false
         })
       }
     },
     // 重启容器
     handleContainerRestart (id) {
+      this.drawer.spinShow = true
       restartContainer(this.drawer.ip, id).then(res => {
         if (res.data.ok) {
           this.$Notice.success({
@@ -430,20 +448,23 @@ export default {
             title: 'error',
             desc: res.data.msg
           })
+          this.drawer.spinShow = false
         }
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
           desc: data
         })
+        this.drawer.spinShow = false
       })
     },
     // 删除容器
     handleContainerRemove (id) {
       this.$Modal.confirm({
         title: 'warning',
-        content: '<p>Are you sure doing this？</p><p>this cannot redo！</p>',
+        content: '<p>Are you sure remove this container？</p><p>this cannot redo！</p>',
         onOk: () => {
+          this.drawer.spinShow = true
           removeContainer(this.drawer.ip, id).then(res => {
             if (res.data.ok) {
               this.$Notice.success({
@@ -457,12 +478,14 @@ export default {
                 title: 'error',
                 desc: res.data.msg
               })
+              this.drawer.spinShow = false
             }
           }).catch(data => {
             this.$Notice.error({
               title: 'error',
               desc: data
             })
+            this.drawer.spinShow = false
           })
         }
       })
@@ -471,8 +494,9 @@ export default {
     handleImageRemove (id) {
       this.$Modal.confirm({
         title: 'warning',
-        content: '<p>Are you sure doing this？</p><p>this cannot redo！</p>',
+        content: '<p>Are you sure remove this image？</p><p>this cannot redo！</p>',
         onOk: () => {
+          this.drawer.spinShow = true
           removeImage(this.drawer.ip, id).then(res => {
             if (res.data.ok) {
               this.$Notice.success({
@@ -486,12 +510,14 @@ export default {
                 title: 'error',
                 desc: res.data.msg
               })
+              this.drawer.spinShow = false
             }
           }).catch(data => {
             this.$Notice.error({
               title: 'error',
               desc: data
             })
+            this.drawer.spinShow = false
           })
         }
       })
@@ -502,6 +528,7 @@ export default {
       this.$Modal.confirm({
         title: 'Please enter your tag',
         onOk: () => {
+          this.drawer.spinShow = true
           this.tempValue = this.tempValue ? this.tempValue : 'latest'
           tagImage(this.drawer.ip, id, repository, this.tempValue).then(res => {
             if (res.data.ok) {
@@ -516,12 +543,14 @@ export default {
                 title: 'error',
                 desc: res.data.msg
               })
+              this.drawer.spinShow = false
             }
           }).catch(data => {
             this.$Notice.error({
               title: 'error',
               desc: data
             })
+            this.drawer.spinShow = false
           })
         },
         render: (h) => {
@@ -544,25 +573,29 @@ export default {
     handleImagePush (id) {
       this.$Modal.confirm({
         title: 'warning',
-        content: '<p>Are you sure doing this？</p>',
+        content: '<p>Are you sure push this image？</p>',
         onOk: () => {
+          this.drawer.spinShow = true
           pushImage(this.drawer.ip, id).then(res => {
             if (res.data.ok) {
               this.$Notice.success({
                 title: 'success',
                 desc: 'push image success！'
               })
+              this.drawer.spinShow = false
             } else {
               this.$Notice.error({
                 title: 'error',
                 desc: res.data.msg
               })
+              this.drawer.spinShow = false
             }
           }).catch(data => {
             this.$Notice.error({
               title: 'error',
               desc: data
             })
+            this.drawer.spinShow = false
           })
         }
       })
@@ -605,6 +638,7 @@ export default {
     },
     // 拉取镜像
     handleImagePull () {
+      this.drawer.spinShow = true
       pullImage(this.drawer.ip, this.pull.name, this.pull.isLocal).then(res => {
         if (res.data.ok) {
           this.$Notice.success({
@@ -618,12 +652,14 @@ export default {
             title: 'error',
             desc: res.data.msg
           })
+          this.drawer.spinShow = false
         }
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
           desc: data
         })
+        this.drawer.spinShow = false
       })
     },
     // 创建容器模态框
@@ -633,23 +669,27 @@ export default {
     },
     // 创建容器
     handleContainerCreate () {
+      this.drawer.spinShow = true
       createContainer(this.drawer.ip, this.createContainer.id, this.createContainer.name, this.createContainer.ports, this.createContainer.volumes).then(res => {
         if (res.data.ok) {
           this.$Notice.success({
             title: 'success',
             desc: 'create container success！'
           })
+          this.drawer.spinShow = false
         } else {
           this.$Notice.error({
             title: 'error',
             desc: res.data.msg
           })
+          this.drawer.spinShow = false
         }
       }).catch(data => {
         this.$Notice.error({
           title: 'error',
           desc: data
         })
+        this.drawer.spinShow = false
       })
     }
   },
@@ -714,7 +754,8 @@ export default {
 .modal-row {
   margin-bottom: 5px;
 }
-.logDetail-pre {
-
+.spin-icon-load{
+  animation: ani-demo-spin 1s linear infinite;
 }
+
 </style>
