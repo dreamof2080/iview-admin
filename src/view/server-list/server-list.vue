@@ -37,7 +37,8 @@
       <div class="drawer-header">
         <Row class="drawer-header-row">
           <i-Col span="6" class="drawer-header-row-name">Total</i-Col>
-          <i-Col span="18">{{drawer.type==='container'?containers.total:images.total}}</i-Col>
+          <i-Col span="12">{{drawer.type==='container'?containers.total:images.total}}</i-Col>
+          <i-Col span="6" v-if="drawer.type==='image'"><Button type="info" size="small" @click="handleShowPull">pull image</Button></i-Col>
         </Row>
         <Row v-if="drawer.type==='container'" class="drawer-header-row">
           <i-Col span="8" class="drawer-header-row-name">Running</i-Col>
@@ -75,6 +76,7 @@
                   <Button size="small" type="warning" ghost @click="handleImageRemove(repo)">remove</Button>
                   <Button size="small" type="success" ghost @click="handleImageTag(item.id, repo)">tag</Button>
                   <Button size="small" type="primary" ghost @click="handleImagePush(repo)">push</Button>
+                  <Button size="small" type="info" ghost @click="handleShowContainerCreate(repo)">create container</Button>
                 </ButtonGroup>
               </div>
             </i-Col>
@@ -150,8 +152,8 @@
     <Modal
       v-model="logModel.flag"
       title="选择开始日期和行数"
-      @on-ok="handleLogModel">
-      <Row class="logModel-row">
+      @on-ok="handleLogModal">
+      <Row class="modal-row">
         <i-Col span="6">
           日期
         </i-Col>
@@ -177,6 +179,65 @@
       footer-hide>
       <pre class="logDetail-pre">{{logDetail.log}}</pre>
     </Modal>
+
+    <!--    拉取镜像-->
+    <Modal
+      width="400"
+      v-model="pull.flag"
+      title="pull image"
+      @on-ok="handleImagePull">
+      <Row class="modal-row">
+        <i-Col span="6">
+          image name
+        </i-Col>
+        <i-Col span="18">
+          <Input type="text" v-model="pull.name" size="small" placeholder="please enter image name" style="width: 250px"/>
+        </i-Col>
+      </Row>
+      <Row>
+        <i-Col span="6">
+          local registry
+        </i-Col>
+        <i-Col span="18">
+          <Select v-model="pull.isLocal" size="small" style="width:100px">
+            <Option :value="0" :key="0">NO</Option>
+            <Option :value="1" :key="1">YES</Option>
+          </Select>
+        </i-Col>
+      </Row>
+    </Modal>
+
+    <!--    创建容器-->
+    <Modal
+      width="500"
+      v-model="createContainer.flag"
+      title="create container"
+      @on-ok="handleContainerCreate">
+      <Row class="modal-row">
+        <i-Col span="6">
+          Container Name
+        </i-Col>
+        <i-Col span="18">
+          <Input type="text" v-model="createContainer.name" size="small" placeholder="please enter container name" style="width: 300px"/>
+        </i-Col>
+      </Row>
+      <Row class="modal-row">
+        <i-Col span="6">
+          Port Bindings
+        </i-Col>
+        <i-Col span="18">
+          <Input type="textarea" :rows="4" v-model="createContainer.ports" size="small" placeholder="{5001:8066,5002:8067,...}" style="width: 300px"/>
+        </i-Col>
+      </Row>
+      <Row>
+        <i-Col span="6">
+          Volume Bindings
+        </i-Col>
+        <i-Col span="18">
+          <Input type="textarea" :rows="4" v-model="createContainer.volumes" size="small" placeholder="{'/bestlink/tomcat8/logs':'/oa/tomcat/logs','/bestlink/tomcat8/webapps':'/oa/tomcat/webapps',...}" style="width: 300px"/>
+        </i-Col>
+      </Row>
+    </Modal>
   </div>
 </template>
 
@@ -192,7 +253,9 @@ import {
   getImageList,
   removeImage,
   tagImage,
-  pushImage } from '@/api/data'
+  pushImage,
+  pullImage,
+  createContainer } from '@/api/data'
 export default {
   name: 'server_list_page',
   data () {
@@ -223,7 +286,25 @@ export default {
         log: ''
       },
       // 临时信息记录
-      tempValue: ''
+      tempValue: '',
+      // 拉取镜像
+      pull: {
+        flag: false,
+        name: '',
+        isLocal: 0
+      },
+      // 创建容器
+      createContainer: {
+        flag: false,
+        // 容器ID或repo:tag
+        id: '',
+        // 容器名称
+        name: '',
+        // 端口映射
+        ports: '',
+        // 挂载映射
+        volumes: ''
+      }
     }
   },
   computed: {
@@ -496,8 +577,7 @@ export default {
       this.logModel.dateTime = date
     },
     // 获取日志信息
-    handleLogModel () {
-      console.log(this.logModel.dateTime)
+    handleLogModal () {
       if (this.logModel.dateTime && this.logModel.tail) {
         getContainerLog(this.drawer.ip, this.logModel.id, this.logModel.dateTime, this.logModel.tail).then(res => {
           if (res.data.ok) {
@@ -518,6 +598,59 @@ export default {
       } else {
         this.$Message.warning('please write all data!')
       }
+    },
+    // 显示拉取镜像的模态框
+    handleShowPull () {
+      this.pull.flag = true
+    },
+    // 拉取镜像
+    handleImagePull () {
+      pullImage(this.drawer.ip, this.pull.name, this.pull.isLocal).then(res => {
+        if (res.data.ok) {
+          this.$Notice.success({
+            title: 'success',
+            desc: 'pull image success！'
+          })
+          // 刷新drawer
+          this.handleDockerImageClick(this.drawer.ip)
+        } else {
+          this.$Notice.error({
+            title: 'error',
+            desc: res.data.msg
+          })
+        }
+      }).catch(data => {
+        this.$Notice.error({
+          title: 'error',
+          desc: data
+        })
+      })
+    },
+    // 创建容器模态框
+    handleShowContainerCreate (id) {
+      this.createContainer.id = id
+      this.createContainer.flag = true
+    },
+    // 创建容器
+    handleContainerCreate () {
+      createContainer(this.drawer.ip, this.createContainer.id, this.createContainer.name, this.createContainer.ports, this.createContainer.volumes).then(res => {
+        if (res.data.ok) {
+          this.$Notice.success({
+            title: 'success',
+            desc: 'create container success！'
+          })
+        } else {
+          this.$Notice.error({
+            title: 'error',
+            desc: res.data.msg
+          })
+        }
+      }).catch(data => {
+        this.$Notice.error({
+          title: 'error',
+          desc: data
+        })
+      })
     }
   },
   mounted () {
@@ -578,7 +711,7 @@ export default {
     }
   }
 }
-.logModel-row {
+.modal-row {
   margin-bottom: 5px;
 }
 .logDetail-pre {
