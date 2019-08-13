@@ -30,6 +30,10 @@
           <i-Col span="12" class="grid-card-row-col"><p>Managers</p></i-Col>
           <i-Col span="12">{{item.managers}}</i-Col>
         </Row>
+        <Row class="grid-card-row">
+          <i-Col span="12" class="grid-card-row-col"><p>SSH</p></i-Col>
+          <i-Col span="12"><Button size="small" type="warning">SSH</Button></i-Col>
+        </Row>
       </Card>
     </div>
 <!--    抽屉显示容器信息或镜像信息-->
@@ -707,11 +711,11 @@ export default {
 <style lang="less">
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 300px);
+  grid-template-columns: repeat(auto-fill, 310px);
   gap: 20px 20px;
   &-card {
-    width: 300px;
-    height: 200px;
+    width: 310px;
+    height: 230px;
     background-color: #ddd;
     &-title {
       text-align: center;

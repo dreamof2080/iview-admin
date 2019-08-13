@@ -2,7 +2,7 @@ export default {
   /**
    * @description 配置显示在浏览器标签的title
    */
-  title: '应用管理',
+  title: 'linux及docker管理',
   /**
    * @description token在Cookie中存储的天数，默认1天
    */
@@ -18,8 +18,9 @@ export default {
    */
   baseUrl: {
     // dev: 'https://www.easy-mock.com/mock/5add9213ce4d0e69998a6f51/iview-admin/',
-    dev: 'https://www.easy-mock.com/mock/5d3fba16e9f49f60488cd040/bestlink/',
-    pro: 'https://produce.com'
+    // dev: 'https://www.easy-mock.com/mock/5d3fba16e9f49f60488cd040/bestlink/',
+    dev: 'http://localhost:8092/utilService/',
+    pro: 'http://192.168.0.128:8092/utilService/'
   },
   /**
    * @description 默认打开的首页的路由name值，默认为home
