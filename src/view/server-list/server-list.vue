@@ -54,11 +54,14 @@
           <i-Col span="8">{{containers.exited}}</i-Col>
           <i-Col span="8">{{containers.paused}}</i-Col>
         </Row>
+        <Row v-if="drawer.type==='image'">
+          <i-Col span="8"><Input v-model="searchText" size="small" search placeholder="Enter repository..." /></i-Col>
+        </Row>
       </div>
 
       <div class="drawer-details">
         <!--          镜像信息-->
-        <Card v-if="drawer.type==='image'" class="drawer-details-card" v-for="(item,k) in images.list" :key="k" :name="item.id">
+        <Card class="drawer-details-card" v-for="(item,k) in images.list" :key="k" :name="item.id"  v-if="drawer.type === 'image' && item.repoTags.toLocaleString().indexOf(searchText)>-1">
           <Row class="drawer-details-card-row">
             <i-Col span="4">id</i-Col>
             <i-Col span="18">{{item.id}}</i-Col>
@@ -309,7 +312,9 @@ export default {
         ports: '',
         // 挂载映射
         volumes: ''
-      }
+      },
+      // 镜像搜索
+      searchText: ''
     }
   },
   computed: {
