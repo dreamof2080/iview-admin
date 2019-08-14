@@ -270,7 +270,7 @@ import {
   pushImage,
   pullImage,
   createContainer,
-  getRepositories } from '@/api/data'
+  getRepositories } from '@/api/docker'
 export default {
   name: 'server_list_page',
   data () {

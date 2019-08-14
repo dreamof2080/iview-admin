@@ -27,6 +27,46 @@ export default [
     },
     component: () => import('@/view/login/login.vue')
   },
+  {
+    path: '/',
+    name: '_home',
+    redirect: '/home',
+    meta: {
+      hideInBread: true,
+      notCache: true
+    },
+    component: Main,
+    children: [
+      {
+        path: '/home',
+        name: 'home',
+        meta: {
+          icon: 'ios-navigate',
+          title: '服务器列表'
+        },
+        component: () => import('@/view/server-list/server-list.vue')
+      }
+    ]
+  },
+  {
+    path: '/eureka',
+    name: 'eureka',
+    component: Main,
+    meta: {
+      hideInBread: true
+    },
+    children: [
+      {
+        path: 'eureka_page',
+        name: 'eureka_page',
+        meta: {
+          icon: 'md-notifications',
+          title: 'eureka服务管理'
+        },
+        component: () => import('@/view/eureka/eureka.vue')
+      }
+    ]
+  },
   /*  {
     path: '/',
     name: '_home',
@@ -49,29 +89,7 @@ export default [
         component: () => import('@/view/single-page/home')
       }
     ]
-  }, */
-  {
-    path: '/',
-    name: '_home',
-    redirect: '/home',
-    meta: {
-      hideInBread: true,
-      notCache: true
-    },
-    component: Main,
-    children: [
-      {
-        path: '/home',
-        name: 'home',
-        meta: {
-          icon: 'ios-navigate',
-          title: '服务器列表'
-        },
-        component: () => import('@/view/server-list/server-list.vue')
-      }
-    ]
-  },
-  /*  {
+  }, {
     path: '',
     name: 'doc',
     meta: {
@@ -79,8 +97,7 @@ export default [
       href: 'https://lison16.github.io/iview-admin-doc/#/',
       icon: 'ios-book'
     }
-  }, */
-  /* {
+  }, {
     path: '/join',
     name: 'join',
     component: Main,
@@ -98,8 +115,7 @@ export default [
         component: () => import('@/view/join-page.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/message',
     name: 'message',
     component: Main,
@@ -118,8 +134,7 @@ export default [
         component: () => import('@/view/single-page/message/index.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/components',
     name: 'components',
     meta: {
@@ -237,8 +252,7 @@ export default [
         component: () => import('@/view/components/icons/icons.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/update',
     name: 'update',
     meta: {
@@ -266,8 +280,7 @@ export default [
         component: () => import('@/view/update/update-paste.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/excel',
     name: 'excel',
     meta: {
@@ -295,8 +308,7 @@ export default [
         component: () => import('@/view/excel/export-excel.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/tools_methods',
     name: 'tools_methods',
     meta: {
@@ -315,8 +327,7 @@ export default [
         component: () => import('@/view/tools-methods/tools-methods.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/i18n',
     name: 'i18n',
     meta: {
@@ -334,8 +345,7 @@ export default [
         component: () => import('@/view/i18n/i18n-page.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/error_store',
     name: 'error_store',
     meta: {
@@ -353,8 +363,7 @@ export default [
         component: () => import('@/view/error-store/error-store.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/error_logger',
     name: 'error_logger',
     meta: {
@@ -373,8 +382,7 @@ export default [
         component: () => import('@/view/single-page/error-logger.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/directive',
     name: 'directive',
     meta: {
@@ -392,8 +400,7 @@ export default [
         component: () => import('@/view/directive/directive.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/multilevel',
     name: 'multilevel',
     meta: {
@@ -452,8 +459,7 @@ export default [
         component: () => import('@/view/multilevel/level-2-3.vue')
       }
     ]
-  }, */
-  /* {
+  }, {
     path: '/argu',
     name: 'argu',
     meta: {
