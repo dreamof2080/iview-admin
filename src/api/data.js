@@ -155,6 +155,17 @@ export const getContainerLog = (ip, id, startDateTime, tail) => {
   })
 }
 
+// 获取docker registry中的镜像列表
+export const getRepositories = () => {
+  return axios.request({
+    url: '/docker/registry/repository/list',
+    params: {
+      token: store.state.user.token
+    },
+    method: 'get'
+  })
+}
+
 export const getTableData = () => {
   return axios.request({
     url: 'get_table_data',

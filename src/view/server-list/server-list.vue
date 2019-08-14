@@ -199,20 +199,23 @@
       @on-ok="handleImagePull">
       <Row class="modal-row">
         <i-Col span="6">
-          image name
+          local registry
         </i-Col>
         <i-Col span="18">
-          <Input type="text" v-model="pull.name" size="small" placeholder="please enter image name" style="width: 250px"/>
+          <Select v-model="pull.isLocal" size="small" style="width:100px" @on-change="handleRepository">
+            <Option :value="0" :key="0">NO</Option>
+            <Option :value="1" :key="1">YES</Option>
+          </Select>
         </i-Col>
       </Row>
       <Row>
         <i-Col span="6">
-          local registry
+          image name
         </i-Col>
         <i-Col span="18">
-          <Select v-model="pull.isLocal" size="small" style="width:100px">
-            <Option :value="0" :key="0">NO</Option>
-            <Option :value="1" :key="1">YES</Option>
+          <Input type="text" v-model="pull.name" v-if="pull.isLocal===0" size="small" placeholder="please enter image name" style="width: 250px"/>
+          <Select v-model="pull.name" v-if="pull.isLocal===1" size="small" style="width:250px">
+            <Option v-for="(item,index) in repositories" :value="item" :key="index">{{ item }}</Option>
           </Select>
         </i-Col>
       </Row>
@@ -266,7 +269,8 @@ import {
   tagImage,
   pushImage,
   pullImage,
-  createContainer } from '@/api/data'
+  createContainer,
+  getRepositories } from '@/api/data'
 export default {
   name: 'server_list_page',
   data () {
@@ -318,7 +322,9 @@ export default {
         volumes: ''
       },
       // 镜像搜索
-      searchText: ''
+      searchText: '',
+      // 注册中心镜像列表
+      repositories: []
     }
   },
   computed: {
@@ -700,6 +706,27 @@ export default {
         })
         this.drawer.spinShow = false
       })
+    },
+    // 获取注册中心的镜像列表
+    handleRepository () {
+      if (this.pull.isLocal === 1) {
+        getRepositories().then(res => {
+          if (res.data.ok) {
+            this.repositories = res.data.data.repositories
+            console.log(res.data.data.repositories)
+          } else {
+            this.$Notice.error({
+              title: 'error',
+              desc: res.data.msg
+            })
+          }
+        }).catch(data => {
+          this.$Notice.error({
+            title: 'error',
+            desc: data
+          })
+        })
+      }
     }
   },
   mounted () {
