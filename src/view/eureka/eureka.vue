@@ -11,7 +11,7 @@
     </div>
     <div class="container">
       <Collapse accordion>
-        <Panel v-for="(item,k) in applications.apps" :key="k" :name="item.name">
+        <Panel v-for="(item,k) in applications.apps" :key="k" :name="item.name" v-if="item.up + item.down + item.out > 0">
           {{item.name}}
           <Tag v-if="item.up > 0" color="blue">UP({{item.up}})</Tag>
           <Tag v-if="item.down > 0" color="red">DOWN({{item.down}})</Tag>
@@ -44,9 +44,9 @@
                 <i-Col span="4">action</i-Col>
                 <i-Col span="18">
                   <ButtonGroup size="small">
-                    <Button type="error" @click="handleServiceDelete(instance.app, instance.instanceId, k, index)">DELETE</Button>
                     <Button type="warning" @click="handleServiceOut(instance.app, instance.instanceId, k, index)">OUT OF SERVICE</Button>
                     <Button type="success" @click="handleServiceUp(instance.app, instance.instanceId, k, index)">UP SERVICE</Button>
+                    <Button type="error" @click="handleServiceDelete(instance.app, instance.instanceId, k, index)">DELETE</Button>
                   </ButtonGroup>
                 </i-Col>
               </Row>
@@ -64,7 +64,9 @@ import {
   getService,
   deleteService,
   outOfService,
-  upService } from '@/api/eureka'
+  upService
+} from '@/api/eureka'
+
 export default {
   name: 'eureka_page',
   data () {
@@ -110,6 +112,8 @@ export default {
     handleServiceDelete (appId, instanceId, k, index) {
       deleteService(appId, instanceId).then(res => {
         if (res.data.ok) {
+          // 刷新当前实例的信息
+          this.handleInstanceRefresh(instanceId, k, index)
           this.$Notice.success({
             title: 'success',
             desc: 'delete service success, please refresh later！'
@@ -183,7 +187,12 @@ export default {
       getService(instanceId).then(res => {
         if (res.data.ok) {
           const data = Object.assign({}, this.applications)
-          data.apps[k].instances[index] = res.data.data
+          if (res.data.data.status) {
+            data.apps[k].instances[index] = res.data.data
+          } else {
+            // 执行了DELETE操作，则把数据从数组中删除
+            data.apps[k].instances.splice(index, 1)
+          }
           // 重新计算instances的UP、DOWN、OUT_OF_SERVICE的数量
           const instance_status__count = data.apps[k].instances.reduce((temp, item) => {
             switch (item.status) {
@@ -237,41 +246,49 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.header {
-  width: 80%;
-  margin: 10px auto;
-  &-col {
-    &-title {
-      font-size: 14px;
-      color: #795548;
-      font-weight: bold;
-      &-warn {
-        color: #F44336;
-      }
-    }
-    &-value {
-      margin-left:20px;
-      font-size: 14px;
-      color: #795548;
-      &-warn {
-        color: #F44336;
-      }
-    }
-  }
-}
-.container {
-  margin-top: 20px;
-  &-collapse {
-    &-card {
-      margin-bottom: 10px;
+  .header {
+    width: 80%;
+    margin: 10px auto;
+
+    &-col {
       &-title {
+        font-size: 14px;
+        color: #795548;
         font-weight: bold;
+
+        &-warn {
+          color: #F44336;
+        }
       }
-      &-row {
-        font-size: 13px;
-        margin-bottom: 5px;
+
+      &-value {
+        margin-left: 20px;
+        font-size: 14px;
+        color: #795548;
+
+        &-warn {
+          color: #F44336;
+        }
       }
     }
   }
-}
+
+  .container {
+    margin-top: 20px;
+
+    &-collapse {
+      &-card {
+        margin-bottom: 10px;
+
+        &-title {
+          font-weight: bold;
+        }
+
+        &-row {
+          font-size: 13px;
+          margin-bottom: 5px;
+        }
+      }
+    }
+  }
 </style>
