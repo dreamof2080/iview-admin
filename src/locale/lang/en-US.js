@@ -2,7 +2,7 @@ export default {
   home: 'Home',
   login: 'Login',
   server_list_page: 'Server List',
-  eureka_page: 'eureka server',
+  eureka_page: 'eureka service',
   components: 'Components',
   count_to_page: 'Count-to',
   tables_page: 'Table',
