@@ -49,21 +49,21 @@ export default [
     ]
   },
   {
-    path: '/eureka',
-    name: 'eureka',
+    path: '/service_manage',
+    name: 'service_manage',
     component: Main,
     meta: {
       hideInBread: true
     },
     children: [
       {
-        path: 'eureka_page',
-        name: 'eureka_page',
+        path: 'service_manage_page',
+        name: 'service_manage_page',
         meta: {
           icon: 'md-notifications',
-          title: 'eureka服务管理'
+          title: '服务管理'
         },
-        component: () => import('@/view/eureka/eureka.vue')
+        component: () => import('@/view/service_manage/service_manage.vue')
       }
     ]
   },

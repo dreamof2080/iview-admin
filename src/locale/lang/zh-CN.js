@@ -2,7 +2,7 @@ export default {
   home: '首页',
   login: '登录',
   server_list_page: '服务器列表',
-  eureka_page: 'eureka服务管理',
+  service_manage_page: '服务管理',
   components: '组件',
   count_to_page: '数字渐变',
   tables_page: '多功能表格',

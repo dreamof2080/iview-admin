@@ -65,10 +65,10 @@ import {
   deleteService,
   outOfService,
   upService
-} from '@/api/eureka'
+} from '@/api/service_manage'
 
 export default {
-  name: 'eureka_page',
+  name: 'service_manage_page',
   data () {
     return {
       applications: {
@@ -99,7 +99,7 @@ export default {
         this.applications = res.data.data
         this.$Notice.success({
           title: 'success',
-          desc: 'get eureka data success！'
+          desc: 'get service list success！'
         })
       }).catch(data => {
         this.$Notice.error({
