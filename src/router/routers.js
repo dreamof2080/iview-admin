@@ -63,7 +63,7 @@ export default [
           icon: 'md-notifications',
           title: '服务管理'
         },
-        component: () => import('@/view/service_manage/service_manage.vue')
+        component: () => import('@/view/service_manage/service-manage.vue')
       }
     ]
   },

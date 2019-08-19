@@ -65,7 +65,7 @@ import {
   deleteService,
   outOfService,
   upService
-} from '@/api/service_manage'
+} from '@/api/service-manage'
 
 export default {
   name: 'service_manage_page',
