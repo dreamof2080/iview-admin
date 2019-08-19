@@ -24,6 +24,17 @@ export const getContainerList = (ip) => {
 }
 
 // 启动某个容器
+export const renameContainer = (ip, id, name) => {
+  return axios.request({
+    url: '/docker/container/rename/' + ip + '/' + id + '/' + name,
+    params: {
+      token: store.state.user.token
+    },
+    method: 'post'
+  })
+}
+
+// 启动某个容器
 export const startContainer = (ip, id) => {
   return axios.request({
     url: '/docker/container/start/' + ip + '/' + id,

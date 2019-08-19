@@ -145,6 +145,7 @@
                 <i-Col span="4">action</i-Col>
                 <i-Col span="18">
                   <ButtonGroup>
+                    <Button size="small" type="warning" @click="handleContainerRename(item.id)">rename</Button>
                     <Button size="small" type="primary" @click="handleContainerStart(item.id, item.state)">start</Button>
                     <Button size="small" type="info" @click="handleContainerStop(item.id, item.state)">stop</Button>
                     <Button size="small" type="success" @click="handleContainerRestart(item.id)">restart</Button>
@@ -270,7 +271,8 @@ import {
   pushImage,
   pullImage,
   createContainer,
-  getRepositories } from '@/api/docker'
+  getRepositories,
+  renameContainer } from '@/api/docker'
 export default {
   name: 'server_list_page',
   data () {
@@ -324,7 +326,9 @@ export default {
       // 镜像搜索
       searchText: '',
       // 注册中心镜像列表
-      repositories: []
+      repositories: [],
+      // 重命名容器
+      rename: ''
     }
   },
   computed: {
@@ -379,6 +383,59 @@ export default {
           desc: data
         })
         this.drawer.spinShow = false
+      })
+    },
+    // 重命名容器
+    handleContainerRename (id) {
+      this.rename = ''
+      this.drawer.spinShow = true
+      this.$Modal.confirm({
+        title: 'Please enter new container name',
+        onOk: () => {
+          if (!this.rename) {
+            this.drawer.spinShow = false
+            return
+          }
+          renameContainer(this.drawer.ip, id, this.rename).then(res => {
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: 'success',
+                desc: 'rename container success！'
+              })
+              // 刷新drawer
+              this.handleDockerContainerClick(this.drawer.ip)
+            } else {
+              this.$Notice.error({
+                title: 'error',
+                desc: res.data.msg
+              })
+              this.drawer.spinShow = false
+            }
+          }).catch(data => {
+            this.$Notice.error({
+              title: 'error',
+              desc: data
+            })
+            this.drawer.spinShow = false
+          })
+        },
+        onCancel: () => {
+          this.drawer.spinShow = false
+        },
+        render: (h) => {
+          return h('Input', {
+            props: {
+              value: this.rename,
+              autofocus: true,
+              placeholder: 'Please enter new container name...'
+            },
+            on: {
+              input: (val) => {
+                this.rename = val
+              }
+            }
+          })
+        }
       })
     },
     // 启动容器
