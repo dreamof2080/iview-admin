@@ -15,8 +15,8 @@
         <Row class="grid-card-row">
           <i-Col span="12" class="grid-card-row-col"><p>Docker</p></i-Col>
           <i-Col span="12">
-            <p v-if="!item.isDocker">NO</p>
-            <ButtonGroup  v-if="item.isDocker" class="grid-card-row-col-button">
+            <p v-show="!item.isDocker">NO</p>
+            <ButtonGroup  v-show="item.isDocker" class="grid-card-row-col-button">
               <Button type="info" size="small" @click="handleDockerImageClick(item.ip)">Images</Button>
               <Button type="success" size="small" @click="handleDockerContainerClick(item.ip)">Containers</Button>
             </ButtonGroup>
