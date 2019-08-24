@@ -38,7 +38,7 @@
     </div>
 <!--    抽屉显示容器信息或镜像信息-->
     <Drawer :title="drawer.title" width="840" :draggable="true"  v-model="drawer.flag" class="drawer">
-      <Spin fix v-if="drawer.spinShow">
+      <Spin fix v-show="drawer.spinShow">
         <Icon type="ios-loading" size=18 class="spin-icon-load"></Icon>
         <div>Loading</div>
       </Spin>
@@ -46,26 +46,26 @@
         <Row class="drawer-header-row">
           <i-Col span="6" class="drawer-header-row-name">Total</i-Col>
           <i-Col span="12">{{drawer.type==='container'?containers.total:images.total}}</i-Col>
-          <i-Col span="6" v-if="drawer.type==='image'"><Button type="info" size="small" @click="handleShowPull">pull image</Button></i-Col>
+          <i-Col span="6" v-show="drawer.type==='image'"><Button type="info" size="small" @click="handleShowPull">pull image</Button></i-Col>
         </Row>
-        <Row v-if="drawer.type==='container'" class="drawer-header-row">
+        <Row v-show="drawer.type==='container'" class="drawer-header-row">
           <i-Col span="8" class="drawer-header-row-name">Running</i-Col>
           <i-Col span="8" class="drawer-header-row-name">Exited</i-Col>
           <i-Col span="8" class="drawer-header-row-name">Paused</i-Col>
         </Row>
-        <Row v-if="drawer.type==='container'" class="drawer-header-row">
+        <Row v-show="drawer.type==='container'" class="drawer-header-row">
           <i-Col span="8">{{containers.running}}</i-Col>
           <i-Col span="8">{{containers.exited}}</i-Col>
           <i-Col span="8">{{containers.paused}}</i-Col>
         </Row>
-        <Row v-if="drawer.type==='image'">
+        <Row v-show="drawer.type==='image'">
           <i-Col span="8"><Input v-model="searchText" size="small" search placeholder="Enter repository..." /></i-Col>
         </Row>
       </div>
 
       <div class="drawer-details">
         <!--          镜像信息-->
-        <Card class="drawer-details-card" v-for="(item,k) in images.list" :key="k" :name="item.id"  v-if="drawer.type === 'image' && item.repoTags.toLocaleString().indexOf(searchText)>-1">
+        <Card class="drawer-details-card" v-for="(item,k) in images.list" :key="k" :name="item.id"  v-show="drawer.type === 'image' && item.repoTags.toLocaleString().indexOf(searchText)>-1">
           <Row class="drawer-details-card-row">
             <i-Col span="4">id</i-Col>
             <i-Col span="18">{{item.id}}</i-Col>
@@ -106,12 +106,12 @@
           </Row>
         </Card>
         <!--          容器信息-->
-        <Collapse v-if="drawer.type==='container'" accordion>
+        <Collapse v-show="drawer.type==='container'" accordion>
           <Panel v-for="(item,k) in containers.list" :key="k" :name="item.id">
             {{item.names[0].substring(1)}}
-            <Tag v-if="item.state==='running'" color="blue">Running</Tag>
-            <Tag v-if="item.state==='exited'" color="red">Exited</Tag>
-            <Tag v-if="item.state==='paused'" color="orange">Paused</Tag>
+            <Tag v-show="item.state==='running'" color="blue">Running</Tag>
+            <Tag v-show="item.state==='exited'" color="red">Exited</Tag>
+            <Tag v-show="item.state==='paused'" color="orange">Paused</Tag>
             <Card slot="content" class="drawer-details-card">
               <Row class="drawer-details-card-row">
                 <i-Col span="4">id</i-Col>
@@ -214,8 +214,8 @@
           image name
         </i-Col>
         <i-Col span="18">
-          <Input type="text" v-model="pull.name" v-if="pull.isLocal===0" size="small" placeholder="please enter image name" style="width: 250px"/>
-          <Select v-model="pull.name" v-if="pull.isLocal===1" size="small" style="width:250px">
+          <Input type="text" v-model="pull.name" v-show="pull.isLocal===0" size="small" placeholder="please enter image name" style="width: 250px"/>
+          <Select v-model="pull.name" v-show="pull.isLocal===1" size="small" style="width:250px">
             <Option v-for="(item,index) in repositories" :value="item" :key="index">{{ item }}</Option>
           </Select>
         </i-Col>
